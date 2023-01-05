@@ -55,3 +55,36 @@ interface ImportMeta {
 
 这个属性用来在不同的模块实例间共享一些数据
 见 `state.ts`
+
+### import.meta.hot.decline()
+
+这个方法调用之后，相当于表示此模块不可热更新，当模块更新时会强制进行页面刷新
+
+### import.meta.hot.invalidate()
+
+这个方法就更简单了，只是用来强制刷新页面
+
+### 自定义事件 import.meta.hot.on
+
+- `vite:beforeUpdate` 当模块更新时触发
+- `vite:beforeFullReload` 当即将重新刷新页面时触发
+- `vite:beforePrune` 当不再需要的模块即将被剔除时触发
+- `vite:error` 当发生错误时（例如，语法错误）触发
+
+**怎么触发**
+
+```ts
+// 插件  handleHotUpdate钩子
+handleHotUpdate({ server }) {
+  server.ws.send({
+    type: 'custom',
+    event: 'custom-update',
+    data: {}
+  })
+  return []
+}
+// 前端代码
+import.meta.hot.on('custom-update', (data) => {
+  // 自定义更新逻辑
+})
+```
