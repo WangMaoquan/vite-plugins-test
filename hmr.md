@@ -49,3 +49,9 @@ interface ImportMeta {
 ### 模块销毁时逻辑: hot.dispose
 
 这个方法相较而言就好理解多了，代表在模块更新、旧模块需要销毁时需要做的一些事情
+见 `state.ts`
+
+### 共享数据: hot.data 属性
+
+这个属性用来在不同的模块实例间共享一些数据
+见 `state.ts`
