@@ -43,3 +43,5 @@ interface ImportMeta {
    见 `render.ts`
 2. 接受依赖模块的更新
    main 模块依赖 `render` 模块，也就是说，main 模块是 `render` 父模块，那么我们也可以在 main 模块中接受 `render` 模块的更新，此时 HMR 边界就是 main 模块了
+3. 接受多个子模块的更新
+   这里的意思是父模块可以接受多个子模块的更新，当其中任何一个子模块更新之后，父模块会成为 HMR 边界
