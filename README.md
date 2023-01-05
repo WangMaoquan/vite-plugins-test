@@ -1,4 +1,4 @@
-### 自定义 vite 插件
+## 自定义 vite 插件
 
 1. Vite 插件与 Rollup 插件结构类似，为一个 `name` 和各种插件 Hook 的对象:
 
@@ -39,9 +39,9 @@
    };
    ```
 
-### 插件 Hook 介绍
+## 插件 Hook 介绍
 
-#### 通用 Hook
+### 通用 Hook
 
 Vite 开发阶段会模拟 `Rollup` 的行为, 其中 Vite 会调用一系列与 Rollup 兼容的钩子，这个钩子主要分为三个阶段
 
@@ -51,9 +51,9 @@ Vite 开发阶段会模拟 `Rollup` 的行为, 其中 Vite 会调用一系列与
 
 除了以上钩子，其他 Rollup 插件钩子(如 `moduleParsed`、`renderChunk`)均不会在 Vite `开发阶段`调用。而生产环境下，由于 Vite 直接使用 Rollup，Vite 插件中所有 Rollup 的插件钩子都会生效
 
-#### 独有 Hook
+### 独有 Hook
 
-1. config
+1. 修改配置 config
    Vite 在读取完配置文件（即 vite.config.ts）之后，会拿到用户导出的配置对象，然后执行 `config` 钩子。在这个钩子里面，你可以对配置文件导出的对象进行自定义的操作
 
    ```ts
@@ -104,4 +104,28 @@ Vite 开发阶段会模拟 `Rollup` 的行为, 其中 Vite 会调用一系列与
        }
       }
    }
+   ```
+
+2. 最终配置: configResolved
+   Vite 在解析完配置之后会调用 `configResolved` 钩子，这个钩子一般用来记录最终的配置信息，而不建议再修改配置
+
+   ```ts
+   const exmaplePlugin = () => {
+     // 保存最终配置
+     let config;
+
+     return {
+       name: 'read-config',
+
+       configResolved(resolvedConfig) {
+         // 记录最终配置
+         config = resolvedConfig;
+       },
+
+       // 在其他钩子中可以访问到配置
+       transform(code, id) {
+         console.log(config);
+       },
+     };
+   };
    ```
