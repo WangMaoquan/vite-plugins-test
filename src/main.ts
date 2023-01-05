@@ -32,6 +32,7 @@ if (import.meta.hot) {
     }
     if (stateModule) {
       stateModule?.initState(); // 改动 state 会出现问题, 因为 定时器没有被移除, 移除的话 可以使用 dispose
+      // 加了dispose 之后, 不会出现错乱 但是 count 是从0 开始的, 所以我们需要一个共享状态的
     }
   });
 }
