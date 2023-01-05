@@ -15,3 +15,5 @@ pnpm run build
 通过官方的 `legacy` 插件， Vite 会分别打包出 `Modern` 模式和 `Legacy` 模式的产物，然后将两种产物插入同一个 HTML `里面，Modern` 产物被放到 `type="module"`的 script 标签中，而 `Legacy` 产物则被放到带有 `nomodule` 的 `script` 标签中
 
 ### 插件执行原理
+
+// todo 回头看源码
