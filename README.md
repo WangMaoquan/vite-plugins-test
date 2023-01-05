@@ -4,11 +4,11 @@
 
    ```ts
    {
-   // 插件名称
-   name: 'vite-plugin-xxx',
-   load(code) {
-    // 钩子逻辑
-   },
+      // 插件名称
+      name: 'vite-plugin-xxx',
+      load(code) {
+       // 钩子逻辑
+      },
    }
    ```
 
@@ -37,4 +37,71 @@
        }),
      ],
    };
+   ```
+
+### 插件 Hook 介绍
+
+#### 通用 Hook
+
+Vite 开发阶段会模拟 `Rollup` 的行为, 其中 Vite 会调用一系列与 Rollup 兼容的钩子，这个钩子主要分为三个阶段
+
+- 服务器启动阶段: `options` 和 `buildStart` 钩子会在服务启动时被调用
+- 请求响应阶段: 当浏览器发起请求时，Vite 内部依次调用 `resolveId`、`load` 和 `transform` 钩子
+- 服务器关闭阶段: Vite 会依次执行 `buildEnd` 和 `closeBundle` 钩子
+
+除了以上钩子，其他 Rollup 插件钩子(如 `moduleParsed`、`renderChunk`)均不会在 Vite `开发阶段`调用。而生产环境下，由于 Vite 直接使用 Rollup，Vite 插件中所有 Rollup 的插件钩子都会生效
+
+#### 独有 Hook
+
+1. config
+   Vite 在读取完配置文件（即 vite.config.ts）之后，会拿到用户导出的配置对象，然后执行 `config` 钩子。在这个钩子里面，你可以对配置文件导出的对象进行自定义的操作
+
+   ```ts
+   const editConfigPlugin = () => ({
+     name: 'vite-plugin-modify-config',
+     config: () => ({
+       alias: {
+         react: require.resolve('react'),
+       },
+     }),
+   });
+   ```
+
+   官方推荐的姿势是在 config 钩子中返回一个配置对象，这个配置对象会和 Vite 已有的配置进行深度的合并。不过你也可以通过钩子的入参拿到 config 对象进行自定义的修改
+
+   ```ts
+   const mutateConfigPlugin = () => ({
+     name: 'mutate-config',
+     // command 为 `serve`(开发环境) 或者 `build`(生产环境)
+     config(config, { command }) {
+       // 生产环境中修改 root 参数
+       if (command === 'build') {
+         config.root = __dirname;
+       }
+     },
+   });
+   ```
+
+   在一些比较深层的对象配置中，这种直接修改配置的方式会显得比较麻烦，如 optimizeDeps.esbuildOptions.plugins，需要写很多的样板代码，
+
+   ```ts
+   config.optimizeDeps = config.optimizeDeps || {};
+   config.optimizeDeps.esbuildOptions =
+     config.optimizeDeps.esbuildOptions || {};
+   config.optimizeDeps.esbuildOptions.plugins =
+     config.optimizeDeps.esbuildOptions.plugins || [];
+   ```
+
+   因此这种情况下，建议直接返回一个配置对象
+
+   ```ts
+   config() {
+      return {
+       optimizeDeps: {
+         esbuildOptions: {
+           plugins: []
+         }
+       }
+      }
+   }
    ```
