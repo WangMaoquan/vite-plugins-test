@@ -229,10 +229,32 @@ Vite 开发阶段会模拟 `Rollup` 的行为, 其中 Vite 会调用一系列与
    }
    ```
 
-**总结**
+   **总结**
 
-- `config`: 用来进一步修改配置
-- `configResolved`: 用来记录最终的配置信息
-- `configureServer`: 用来获取 Vite Dev Server 实例，添加中间件
-- `transformIndexHtml`: 用来转换 HTML 的内容
-- `handleHotUpdate`: 用来进行热更新模块的过滤，或者进行自定义的热更新处理
+   - `config`: 用来进一步修改配置
+   - `configResolved`: 用来记录最终的配置信息
+   - `configureServer`: 用来获取 Vite Dev Server 实例，添加中间件
+   - `transformIndexHtml`: 用来转换 HTML 的内容
+   - `handleHotUpdate`: 用来进行热更新模块的过滤，或者进行自定义的热更新处理
+
+6. 插件 Hook 执行顺序
+   详细就看 `vite-plugin-test-hooks`, 执行顺序如下
+
+   ```shell
+   config
+   configResolved
+   options
+   configureServer
+   buildStart
+   options
+   #需要杀死dev server
+   buildEnd
+   closeBundle
+   ```
+
+   **总结**
+
+   - 服务启动阶段: `config`、`configResolved`、`options`、`configureServer`、`buildStart`
+   - 请求响应阶段: 如果是 html 文件，仅执行 `transformIndexHtml` 钩子；对于非 HTML 文件，则依次执行 `resolveId、load` 和 `transform` 钩子
+   - 热更新阶段: 执行 `handleHotUpdate` 钩子
+   - 服务关闭阶段: 依次执行 buildEnd 和 `closeBundle` 钩子
