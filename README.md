@@ -258,3 +258,43 @@ Vite 开发阶段会模拟 `Rollup` 的行为, 其中 Vite 会调用一系列与
    - 请求响应阶段: 如果是 html 文件，仅执行 `transformIndexHtml` 钩子；对于非 HTML 文件，则依次执行 `resolveId、load` 和 `transform` 钩子
    - 热更新阶段: 执行 `handleHotUpdate` 钩子
    - 服务关闭阶段: 依次执行 buildEnd 和 `closeBundle` 钩子
+
+## 插件应用位置
+
+我们来了解一下 Vite 插件的`应用情景`和`应用顺序`
+默认情况下 Vite 插件同时被用于开发环境和生产环境，你可以通过 `apply` 属性来决定应用场景
+
+```ts
+{
+  // 'serve' 表示仅用于开发环境，'build'表示仅用于生产环境
+  apply: 'serve';
+}
+```
+
+`apply` 参数还可以配置成一个函数，进行更灵活的控制
+
+```ts
+apply(config, { command }) {
+  // 只用于非 SSR 情况下的生产环境构建
+  return command === 'build' && !config.build.ssr
+}
+```
+
+同时，你也可以通过 `enforce` 属性来指定插件的执行顺序
+
+```ts
+{
+  // 默认为`normal`，可取值还有`pre`和`post`
+  enforce: 'pre';
+}
+```
+
+**Vite 会依次执行如下的插件**
+
+- Alias (路径别名)相关的插件
+- 带有 `enforce: 'pre'` 的用户插件
+- Vite 核心插件
+- 没有 enforce 值的用户插件，也叫普通插件
+- Vite 生产环境构建用的插件
+- 带有 `enforce: 'post'` 的用户插件
+- Vite 后置构建插件(如压缩插件)
