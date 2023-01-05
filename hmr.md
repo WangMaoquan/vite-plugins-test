@@ -41,3 +41,5 @@ interface ImportMeta {
 1. 接受自身更新
    当模块接受自身的更新时，则当前模块会被认为 HMR 的边界。也就是说，除了当前模块，其他的模块均未受到任何影响
    见 `render.ts`
+2. 接受依赖模块的更新
+   main 模块依赖 `render` 模块，也就是说，main 模块是 `render` 父模块，那么我们也可以在 main 模块中接受 `render` 模块的更新，此时 HMR 边界就是 main 模块了
