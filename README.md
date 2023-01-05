@@ -153,6 +153,7 @@ Vite 开发阶段会模拟 `Rollup` 的行为, 其中 Vite 会调用一系列与
 
 4. 转换 HTML 内容: transformIndexHtml
    这个钩子用来灵活控制 HTML 的内容，你可以拿到原始的 html 内容后进行任意的转换
+
    ```ts
    const htmlPlugin = () => {
       return {
@@ -188,3 +189,50 @@ Vite 开发阶段会模拟 `Rollup` 的行为, 其中 Vite 会调用一系列与
       }
    }
    ```
+
+5. 热更新处理: handleHotUpdate
+   这个钩子会在 Vite 服务端处理热更新时被调用，你可以在这个钩子中拿到热更新相关的上下文信息，进行热更模块的过滤，或者进行自定义的热更处理
+
+   ```ts
+   const handleHmrPlugin = () => {
+     return {
+       async handleHotUpdate(ctx) {
+         // 需要热更的文件
+         console.log(ctx.file);
+         // 需要热更的模块，如一个 Vue 单文件会涉及多个模块
+         console.log(ctx.modules);
+         // 时间戳
+         console.log(ctx.timestamp);
+         // Vite Dev Server 实例
+         console.log(ctx.server);
+         // 读取最新的文件内容
+         console.log(await read());
+         // 自行处理 HMR 事件
+         ctx.server.ws.send({
+           type: 'custom',
+           event: 'special-update',
+           data: { a: 1 },
+         });
+         return [];
+       },
+     };
+   };
+
+   // 前端代码中加入
+   if (import.meta.hot) {
+     import.meta.hot.on('special-update', (data) => {
+       // 执行自定义更新
+       // { a: 1 }
+       console.log(data);
+       window.location.reload();
+     });
+   }
+   ```
+
+**总结**
+
+- `config`: 用来进一步修改配置
+- `configResolved`: 用来记录最终的配置信息
+- `configureServer`: 用来获取 Vite Dev Server 实例，添加中间件
+- `transformIndexHtml`: 用来转换 HTML 的内容
+- `handleHotUpdate`: 用来进行热更新模块的过滤，或者进行自定义的热更新处理
